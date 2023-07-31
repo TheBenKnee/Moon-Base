@@ -25,6 +25,7 @@ public class DepotTile : InteractableTile
     private DepotStatus depotStatus = DepotStatus.Unexplored;
     private DepotStrength depotStrength;
     private int depotSupplies;
+    private int depotCapacity;
 
     public override void TileAction(Rover interactingRover)
     {
@@ -33,11 +34,20 @@ public class DepotTile : InteractableTile
             case DepotStatus.Unexplored:
             {
                 OpenDepot();
+                if(depotStatus == DepotStatus.Opened)
+                {
+                    moonParent.TriggerDepotOpenedUI(this);
+                }
+                if(depotStatus == DepotStatus.Malfunctioned)
+                {
+                    moonParent.TriggerDepotMalfunctionedUI(this);
+                }
                 break;
             }
             case DepotStatus.Opened:
             {
-                // Querry how much to take
+                // Query how much to take
+                moonParent.TriggerDepotSupplyAccessUI(this);
                 break;
             }
             case DepotStatus.Malfunctioned:
@@ -57,9 +67,23 @@ public class DepotTile : InteractableTile
         acceptableRoverTypes.Add(RoverType.Supply);
     }
 
+    // Method which returns the duration of the fix IN SECONDS
     public float DetermineFixDuration()
     {
-        return 60f;
+        return 3f;
+    }
+
+    public int StoreDepotSupplies(int requestedStorage)
+    {
+        if(depotCapacity - depotSupplies < requestedStorage)
+        {
+            int tempSupplies = depotCapacity - depotSupplies;
+            depotSupplies = depotCapacity;
+            return tempSupplies;
+        }
+
+        depotSupplies += requestedStorage;
+        return requestedStorage;
     }
 
     public int TakeDepotSupplies(int requestedSupplies)
@@ -78,6 +102,24 @@ public class DepotTile : InteractableTile
     public void OpenDepot()
     {
         depotSupplies = DetermineDepotSupplies(depotStrength);
+        switch(depotStrength)
+        {
+            case DepotStrength.Full:
+            {
+                depotCapacity = Constants.FULL_DEPOT_CAPACITY;
+                break;
+            }
+            case DepotStrength.Half:
+            {
+                depotCapacity = Constants.HALF_DEPOT_CAPACITY;
+                break;
+            }
+            case DepotStrength.Weak:
+            {
+                depotCapacity = Constants.WEAK_DEPOT_CAPACITY;
+                break;
+            }
+        }
 
         int seed = Random.Range(0, 100);
         if(seed < 30)
@@ -95,40 +137,24 @@ public class DepotTile : InteractableTile
     public int DetermineDepotSupplies(DepotStrength strength)
     {
         int seed = Random.Range(0, 100);
+        if(seed < 40)
+        {
+            return 0;
+        }
+
         switch(strength)
         {
             case DepotStrength.Full:
             {
-                if(seed < 40)
-                {
-                    return 0;
-                }
-                else
-                {
-                    return 70;
-                }
+                return Constants.FULL_DEPOT_CAPACITY;
             }
             case DepotStrength.Half:
             {
-                if(seed < 40)
-                {
-                    return 0;
-                }
-                else
-                {
-                    return 35;
-                }
+                return Constants.HALF_DEPOT_CAPACITY;
             }
             case DepotStrength.Weak:
             {
-                if(seed < 40)
-                {
-                    return 0;
-                }
-                else
-                {
-                    return 20;
-                }
+                return Constants.WEAK_DEPOT_CAPACITY;
             }
             default:
             {
@@ -143,6 +169,16 @@ public class DepotTile : InteractableTile
         return depotSupplies;
     }
 
+    public int GetDepotCapacity()
+    {
+        return depotCapacity;
+    }
+
+    public int GetDepotRemainingStorage()
+    {
+        return depotCapacity - depotSupplies;
+    }
+
     public DepotStatus GetDepotStatus()
     {
         return depotStatus;
@@ -154,9 +190,9 @@ public class DepotTile : InteractableTile
     }
 
     // 'Overriding' MoonTile method for actions at tile creation
-    public virtual void InitializeTile(DepotStrength initializedStrength, int xLocation, int yLocation)
+    public virtual void InitializeTile(DepotStrength initializedStrength, int xLocation, int yLocation, Moon parentMoon)
     {
-        base.InitializeTile(xLocation, yLocation);
+        base.InitializeTile(xLocation, yLocation, parentMoon);
         depotStrength = initializedStrength;
         switch(initializedStrength)
         {

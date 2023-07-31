@@ -9,13 +9,6 @@ public class DepotToggleSlider : ToggleSlider
     public override void TogglePosition()
     {
         base.TogglePosition();
-        if(!isOn)
-        {
-            myDepotUIHandler.SetDebotSliderAmounts(0, myDepotUIHandler.currentStorage);
-        }
-        else
-        {
-            myDepotUIHandler.SetDebotSliderAmounts(0, myDepotUIHandler.storageCapacity - myDepotUIHandler.currentStorage);
-        }
+        myDepotUIHandler.depotAccess.UpdateSliderValues();
     }
 }

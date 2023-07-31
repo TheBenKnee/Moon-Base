@@ -16,7 +16,7 @@ public class MoonBaseTile : InteractableTile
             }
             case MoonBaseStatus.Opened:
             {
-                // Querry how much to take
+                // Query how much to take
                 break;
             }
         }
@@ -24,9 +24,9 @@ public class MoonBaseTile : InteractableTile
 
 
     // 'Overriding' MoonTile method for actions at tile creation
-    public virtual void InitializeTile(MoonBase theMoonBase, int xLocation, int yLocation)
+    public virtual void InitializeTile(MoonBase theMoonBase, int xLocation, int yLocation, Moon parentMoon)
     {
-        base.InitializeTile(xLocation, yLocation);
+        base.InitializeTile(xLocation, yLocation, parentMoon);
         moonBase = theMoonBase;
 
         acceptableRoverTypes.Add(RoverType.Repair);
