@@ -25,9 +25,9 @@ public class InteractableQuery : MonoBehaviour
         {
             queryText.text = "Interact with Supply Depot?";
         }
-        if(interactableTile.GetType() == typeof(ScienceTile))
+        if(interactableTile.GetType() == typeof(ExperimentTile))
         {
-            queryText.text = "Interact with Science Object?";
+            queryText.text = "Interact with Science Experiment Object?";
         }
         if(interactableTile.GetType() == typeof(MoonBaseTile))
         {

@@ -30,12 +30,6 @@ public class InteractableTile : MoonTile
 
     }
 
-    public override void EnterTile(Rover enteringRover)
-    {
-        base.EnterTile(enteringRover);
-        moonParent.TriggerInteractableQuery(this, enteringRover);
-    }
-
     public override void LeaveTile(Rover leavingRover)
     {
         base.LeaveTile(leavingRover);

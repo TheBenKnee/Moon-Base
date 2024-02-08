@@ -9,7 +9,7 @@ public class MoonTile : MonoBehaviour
 
     public virtual void EnterTile(Rover enteringRover)
     {
-        Debug.Log(enteringRover.GetRoverType().ToString() + " rover entering tile (" + x + ", " + y + ").");
+        // Debug.Log(enteringRover.GetRoverType().ToString() + " rover entering tile (" + x + ", " + y + ").");
     }
 
     public virtual void LeaveTile(Rover leavingRover)

@@ -36,18 +36,18 @@ public class DepotTile : InteractableTile
                 OpenDepot();
                 if(depotStatus == DepotStatus.Opened)
                 {
-                    moonParent.TriggerDepotOpenedUI(this);
+                    NotificationManager.instance.ShowInfoNotification("Depot at (" + x + ", " + y + ") successfully opened with " + depotSupplies + " supplies available.");
                 }
                 if(depotStatus == DepotStatus.Malfunctioned)
                 {
-                    moonParent.TriggerDepotMalfunctionedUI(this);
+                    NotificationManager.instance.ShowInfoNotification("Depot at (" + x + ", " + y + ") has a malfunction. Repair or Lab rover required for repair.");
                 }
                 break;
             }
             case DepotStatus.Opened:
             {
                 // Query how much to take
-                moonParent.TriggerDepotSupplyAccessUI(this);
+                NotificationManager.instance.DepotAccessUI(this, interactingRover, AttemptDepotInteract);
                 break;
             }
             case DepotStatus.Malfunctioned:
@@ -71,6 +71,41 @@ public class DepotTile : InteractableTile
     public float DetermineFixDuration()
     {
         return 3f;
+    }
+
+    public void AttemptDepotInteract(Rover interactingRover, int interactAmount, bool taking)
+    {
+        if(taking)
+        {
+            if(interactAmount > depotSupplies)
+            {
+                NotificationManager.instance.ShowInfoNotification("Error: Supply Rover attempted to take " + interactAmount + " supplies, yet Depot only has " + depotSupplies + " supplies.");
+            }
+            else
+            {
+                interactingRover.AddSupplies(TakeDepotSupplies(interactAmount));
+                NotificationManager.instance.ShowInfoNotification("Successfully took " + interactAmount + " supplies. Depot now has " + depotSupplies + " remaining supplies.");
+            }
+        }
+        else
+        {
+            if(interactAmount > depotCapacity - depotSupplies)
+            {
+                NotificationManager.instance.ShowInfoNotification("Error: Supply Rover attempted to store " + interactAmount + " supplies, yet Depot only has room for " + (depotCapacity - depotSupplies) + " supplies.");
+            }
+            else
+            {
+                if(interactingRover.GetSupplies() < interactAmount)
+                {
+                    NotificationManager.instance.ShowInfoNotification("Error: Supply Rover attempted to store " + interactAmount + " supplies, yet Rover only has " + interactingRover.GetSupplies() + " supplies.");
+                }
+                else
+                {
+                    interactingRover.TakeSupplies(StoreDepotSupplies(interactAmount));
+                    NotificationManager.instance.ShowInfoNotification("Successfully stored " + interactAmount + " supplies. Depot now has " + depotSupplies + " total supplies.");
+                }
+            }
+        }
     }
 
     public int StoreDepotSupplies(int requestedStorage)

@@ -52,32 +52,59 @@ public class Rover : MonoBehaviour
     protected RoverType myRoverType;
     protected RoverStatus myRoverStatus = RoverStatus.Ready;
     protected int supplies;
-    public Color waitingColor = Color.yellow;
-    public Color defaultColor;
+    protected Color waitingColor = Color.yellow;
+    protected Color defaultColor;
     private float waitTime = 0;
 
-    public Moon parentMoon;
-    public MoonTile roverPosition;
+    protected Moon parentMoon;
+    protected MoonTile roverPosition;
 
     private RoverTask currentTask;
     private Queue<RoverTask> roverTasks = new Queue<RoverTask>();
 
-    public void MoveRover(Direction direction, int suppliesNeeded)
+    private int remainingMovement;
+
+    public void InitializeRover(Moon zeMoon, MoonTile newTile)
+    {
+        parentMoon = zeMoon;
+        SetSupplies(Random.Range(20, 30));
+        TeleportRoverToTile(newTile);
+    }
+
+    public bool CheckSupplies(int suppliesNeeded)
     {
         // Check to see if sufficient supplies
         if(supplies < suppliesNeeded)
         {
             // Trigger refill protocol
-
-            return;
+            Debug.Log("Not enough supplies for rover to move.");
+            return false;
         }
 
+        return true;
+    }
+
+    public bool CheckDirectionAvailable(Direction direction)
+    {
         // Get new position based on diretion of movement
         MoonTile newPosition = parentMoon.GetTileAdjacent(roverPosition, direction);
         if(newPosition == null)
         {
-            return;
+            Debug.Log("No tile in direction to move to.");
+            return false;
         }
+
+        return true;
+    }
+
+    // Will move the rover and trigger any tile interactions. Will return true if movement possible, false if not.
+    public void MoveRover(Direction direction, int suppliesNeeded)
+    {
+        // Update the backend supply number
+        TakeSupplies(suppliesNeeded);
+
+        // Get the new position
+        MoonTile newPosition = parentMoon.GetTileAdjacent(roverPosition, direction);
 
         // Trigger any leave conditions
         roverPosition.LeaveTile(this);
@@ -87,6 +114,15 @@ public class Rover : MonoBehaviour
 
         // Trigger any enter conditions
         roverPosition.EnterTile(this);
+
+        // Move rover visually (TODO: Maybe move this somewhere else)
+        gameObject.transform.position = new Vector3(roverPosition.x + 0.5f, roverPosition.y + 0.5f, 0);
+    }
+
+    public void TeleportRoverToTile(MoonTile newTile)
+    {
+        // Switch internal tracking
+        roverPosition = newTile;
 
         // Move rover visually (TODO: Maybe move this somewhere else)
         gameObject.transform.position = new Vector3(roverPosition.x + 0.5f, roverPosition.y + 0.5f, 0);
@@ -174,6 +210,16 @@ public class Rover : MonoBehaviour
     // GET/SET Methods
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    public int GetRemainingMovement()
+    {
+        return remainingMovement;
+    }
+
+    public void SetRemainingMovement(int newMovement)
+    {
+        remainingMovement = newMovement;
+    }
+
     public RoverStatus GetRoverStatus()
     {
         return myRoverStatus;
@@ -192,5 +238,10 @@ public class Rover : MonoBehaviour
     public void SetSupplies(int newSupplies)
     {
         supplies = newSupplies;
+    }
+
+    public MoonTile GetRoverPosition()
+    {
+        return roverPosition;
     }
 }

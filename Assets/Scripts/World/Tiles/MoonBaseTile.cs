@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class MoonBaseTile : InteractableTile
 {
+    [SerializeField] private List<Sprite> moonBaseSprites;
+
     private MoonBase moonBase;
 
     public override void TileAction(Rover interactingRover)
@@ -16,7 +18,6 @@ public class MoonBaseTile : InteractableTile
             }
             case MoonBaseStatus.Opened:
             {
-                // Query how much to take
                 break;
             }
         }
@@ -24,10 +25,12 @@ public class MoonBaseTile : InteractableTile
 
 
     // 'Overriding' MoonTile method for actions at tile creation
-    public virtual void InitializeTile(MoonBase theMoonBase, int xLocation, int yLocation, Moon parentMoon)
+    public virtual void InitializeTile(MoonBase theMoonBase, int tileNumber, int xLocation, int yLocation, Moon parentMoon)
     {
         base.InitializeTile(xLocation, yLocation, parentMoon);
         moonBase = theMoonBase;
+
+        GetComponent<SpriteRenderer>().sprite = moonBaseSprites[tileNumber - 1];
 
         acceptableRoverTypes.Add(RoverType.Repair);
         acceptableRoverTypes.Add(RoverType.Lab);
