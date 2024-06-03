@@ -1235,7 +1235,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3470,6 +3470,7 @@ MonoBehaviour:
   launchPadTilePrefab: {fileID: 4904296182413833852, guid: 9bb5adbe3dc084d4ca65c6e4407eef84, type: 3}
   tileParent: {fileID: 440662253}
   moonFrontend: {fileID: 1728604711}
+  gameLogic: {fileID: 2006440875}
   moonBase: {fileID: 372311600}
 --- !u!4 &372311599
 Transform:
@@ -4357,7 +4358,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   diceHint: {fileID: 125709638}
-  movementButtons: {fileID: 1190610842}
   gameLogic: {fileID: 2006440875}
 --- !u!114 &471317328
 MonoBehaviour:
@@ -4779,7 +4779,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.6132076, g: 0.6132076, b: 0.6132076, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -7336,7 +7336,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -15364,7 +15364,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -17110,6 +17110,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moonUI: {fileID: 1728604711}
   dice: {fileID: 471317327}
+  movementButtons: {fileID: 1190610842}
 --- !u!4 &2006440876
 Transform:
   m_ObjectHideFlags: 0
@@ -18162,6 +18163,18 @@ MonoBehaviour:
       - m_Target: {fileID: 1377919612}
         m_TargetAssemblyTypeName: NotificationManager, Assembly-CSharp
         m_MethodName: OnDepotConfirmedClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 2006440875}
+        m_TargetAssemblyTypeName: GameLogic, Assembly-CSharp
+        m_MethodName: UpdateSupplyCountUIOnActiveRover
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

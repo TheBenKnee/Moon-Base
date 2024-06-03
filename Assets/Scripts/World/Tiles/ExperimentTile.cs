@@ -18,16 +18,13 @@ public class ExperimentTile : InteractableTile
     private int experimentNumber;
     private bool keyExperiment;
 
-    public Rover testRover;
-
-    [ContextMenu("PerformTest")]
-    public void performTest()
-    {
-        TileAction(testRover);
-    }
+    private Rover currentRover; 
+    private float currentMalfunctionDuration;
 
     public override void TileAction(Rover interactingRover)
     {
+        currentRover = interactingRover;
+
         switch(experimentStatus)
         {
             case ExperimentStatus.Unexplored:
@@ -50,20 +47,25 @@ public class ExperimentTile : InteractableTile
             }
             case ExperimentStatus.Malfunctioned:
             {
-                float malfunctionedDuration = DetermineFixDuration();
-                interactingRover.AddTask(new RoverTask(malfunctionedDuration, this, 1));
+                currentMalfunctionDuration = DetermineFixDuration();
+                NotificationManager.instance.ShowQueryNotification("Science Experiment will take " + currentMalfunctionDuration + " seconds to repair. Do you wish to start now?", StartExperimentRepair);
                 break;
             }
         }
     }
 
-    public override void FinishedTask(RoverTask finishedTask)
+    public void StartExperimentRepair()
     {
-        base.FinishedTask(finishedTask);
-        experimentStatus = ExperimentStatus.Uncollected;
-        acceptableRoverTypes.Clear();
-        acceptableRoverTypes.Add(RoverType.Supply);
+        // currentRover.AddTask(new RoverTask(currentMalfunctionDuration, this, 1));
     }
+
+    // public override void FinishedTask(RoverTask finishedTask)
+    // {
+    //     base.FinishedTask(finishedTask);
+    //     experimentStatus = ExperimentStatus.Uncollected;
+    //     acceptableRoverTypes.Clear();
+    //     acceptableRoverTypes.Add(RoverType.Supply);
+    // }
 
     // Method which returns the duration of the fix IN SECONDS
     public float DetermineFixDuration()

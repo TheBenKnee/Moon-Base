@@ -1,8 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-
+using System;
 
 public enum RoverType
 {
@@ -16,35 +15,9 @@ public enum RoverType
 public enum RoverStatus
 {
     Ready,
-    Waiting,
+    PerformingTask,
+    Recovery,
     Dead
-}
-
-public class RoverTask
-{
-    public float totalTime;
-    public float elapsedTime;
-    public InteractableTile backReference;
-    public int infoValue;
-
-    public RoverTask(float duration, InteractableTile initialBackRef, int initialInfoValue)
-    {
-        backReference = initialBackRef;
-        totalTime = duration;
-        elapsedTime = duration;
-        infoValue = initialInfoValue;
-    }
-
-    public void TickElapsed(float tick, Rover refRover)
-    {
-        elapsedTime -= tick;
-
-        if(elapsedTime <= 0)
-        {
-            elapsedTime = 0;
-            refRover.FinishedTask(this);
-        }
-    }
 }
 
 public class Rover : MonoBehaviour
@@ -54,20 +27,19 @@ public class Rover : MonoBehaviour
     protected int supplies;
     protected Color waitingColor = Color.yellow;
     protected Color defaultColor;
-    private float waitTime = 0;
+    protected Task currentTask;
+
+    public event Action<Rover, TaskType> OnTaskCompleted;
 
     protected Moon parentMoon;
     protected MoonTile roverPosition;
-
-    private RoverTask currentTask;
-    private Queue<RoverTask> roverTasks = new Queue<RoverTask>();
 
     private int remainingMovement;
 
     public void InitializeRover(Moon zeMoon, MoonTile newTile)
     {
         parentMoon = zeMoon;
-        SetSupplies(Random.Range(20, 30));
+        SetSupplies(UnityEngine.Random.Range(20, 30));
         TeleportRoverToTile(newTile);
     }
 
@@ -77,7 +49,6 @@ public class Rover : MonoBehaviour
         if(supplies < suppliesNeeded)
         {
             // Trigger refill protocol
-            Debug.Log("Not enough supplies for rover to move.");
             return false;
         }
 
@@ -98,7 +69,7 @@ public class Rover : MonoBehaviour
     }
 
     // Will move the rover and trigger any tile interactions. Will return true if movement possible, false if not.
-    public void MoveRover(Direction direction, int suppliesNeeded)
+    public void MoveRover(Direction direction, int suppliesNeeded = 0)
     {
         // Update the backend supply number
         TakeSupplies(suppliesNeeded);
@@ -134,36 +105,33 @@ public class Rover : MonoBehaviour
         MoveRover(Direction.North, 0);
     }
 
+    public void PerformTask(Task task)
+    {
+        if(myRoverStatus != RoverStatus.Ready)
+        {
+            return;
+        }
+
+        myRoverStatus = RoverStatus.PerformingTask;
+        currentTask = task;
+        currentTask.Start();
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Frontend Methods
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    public void FinishedTask(RoverTask finishedTask)
-    {
-        finishedTask.backReference.FinishedTask(finishedTask);
-        GetComponent<SpriteRenderer>().color = defaultColor;
-        currentTask = null;
-    }
 
-    public void AddTask(RoverTask taskToAdd)
+    private void Update() 
     {
-        roverTasks.Enqueue(taskToAdd);
-    }
-
-    private void FixedUpdate() 
-    {
-        if(currentTask != null)
+        if (myRoverStatus == RoverStatus.PerformingTask && currentTask != null)
         {
-            currentTask.TickElapsed(Time.deltaTime, this);
-        }
-        else
-        {
-            if(roverTasks.Count > 0)
+            currentTask.UpdateTask();
+            if(currentTask.isComplete)
             {
-                GetComponent<SpriteRenderer>().color = waitingColor;
-                myRoverStatus = RoverStatus.Waiting;
-                currentTask = roverTasks.Dequeue();
-            }
+                myRoverStatus = RoverStatus.Ready;
+                OnTaskCompleted?.Invoke(this, currentTask.taskType);
+                currentTask = null;
+            }            
         }
     }
 
@@ -171,7 +139,6 @@ public class Rover : MonoBehaviour
     {
         defaultColor = GetComponent<SpriteRenderer>().color;
     }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Health Methods
@@ -181,7 +148,6 @@ public class Rover : MonoBehaviour
     {
         myRoverStatus = RoverStatus.Dead;
     }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Supply Methods
@@ -205,6 +171,10 @@ public class Rover : MonoBehaviour
         return takeSupplies;
     }
 
+    public void EnterRecoveryMode()
+    {
+        myRoverStatus = RoverStatus.Recovery;
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     // GET/SET Methods

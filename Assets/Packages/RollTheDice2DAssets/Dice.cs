@@ -11,7 +11,6 @@ public class Dice : MonoBehaviour {
     private Image rend;
 
     [SerializeField] private GameObject diceHint;
-    [SerializeField] private GameObject movementButtons;
 
     [SerializeField] private GameLogic gameLogic;
 
@@ -44,12 +43,19 @@ public class Dice : MonoBehaviour {
         if(currentDiceNumber <= 1)
         {
             currentDiceNumber -= 1;
-            movementButtons.SetActive(false);
             diceHint.SetActive(false);
             gameObject.SetActive(false);
             return;
         }
         rend.sprite = diceSides[(--currentDiceNumber)-1];
+    }
+
+    public void ClearDice()
+    {
+        currentDiceNumber = 0;
+        rend.sprite = diceSides[0];
+        diceHint.SetActive(false);
+        gameObject.SetActive(false);
     }
 	
     // If you left click over the dice then RollTheDice coroutine is started
@@ -59,7 +65,6 @@ public class Dice : MonoBehaviour {
         StartCoroutine(RollTheDice((finalResult) => {
             currentDiceNumber = finalResult;
             gameLogic.DiceResult(currentDiceNumber);
-            movementButtons.SetActive(true);
         }));
     }
 
@@ -77,8 +82,8 @@ public class Dice : MonoBehaviour {
         // before final side appears. 20 itterations here.
         for (int i = 0; i <= 20; i++)
         {
-            // Pick up random value from 0 to 5 (All inclusive)
-            randomDiceSide = Random.Range(0, 5);
+            // Pick up random value from 0 to 6 (Non-inclusive i.e. 0-5 will be selected)
+            randomDiceSide = Random.Range(0, 6);
 
             // Set sprite to upper face of dice from array according to random value
             rend.sprite = diceSides[randomDiceSide];

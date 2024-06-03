@@ -27,8 +27,13 @@ public class DepotTile : InteractableTile
     private int depotSupplies;
     private int depotCapacity;
 
+    private Rover currentRover; 
+    private float currentMalfunctionDuration;
+
     public override void TileAction(Rover interactingRover)
     {
+        currentRover = interactingRover;
+
         switch(depotStatus)
         {
             case DepotStatus.Unexplored:
@@ -47,25 +52,30 @@ public class DepotTile : InteractableTile
             case DepotStatus.Opened:
             {
                 // Query how much to take
-                NotificationManager.instance.DepotAccessUI(this, interactingRover, AttemptDepotInteract);
+                NotificationManager.instance.DepotAccessUI(this, AttemptDepotInteract);
                 break;
             }
             case DepotStatus.Malfunctioned:
             {
-                float malfunctionedDuration = DetermineFixDuration();
-                interactingRover.AddTask(new RoverTask(malfunctionedDuration, this, 1));
+                currentMalfunctionDuration = DetermineFixDuration();
+                NotificationManager.instance.ShowQueryNotification("Depot will take " + currentMalfunctionDuration + " seconds to repair. Do you wish to start now?", StartDepotRepair);
                 break;
             }
         }
     }
 
-    public override void FinishedTask(RoverTask finishedTask)
+    public void StartDepotRepair()
     {
-        base.FinishedTask(finishedTask);
-        depotStatus = DepotStatus.Opened;
-        acceptableRoverTypes.Clear();
-        acceptableRoverTypes.Add(RoverType.Supply);
+        // currentRover.AddTask(new RoverTask(currentMalfunctionDuration, this, 1));
     }
+
+    // public override void FinishedTask(RoverTask finishedTask)
+    // {
+    //     base.FinishedTask(finishedTask);
+    //     depotStatus = DepotStatus.Opened;
+    //     acceptableRoverTypes.Clear();
+    //     acceptableRoverTypes.Add(RoverType.Supply);
+    // }
 
     // Method which returns the duration of the fix IN SECONDS
     public float DetermineFixDuration()
@@ -73,7 +83,7 @@ public class DepotTile : InteractableTile
         return 3f;
     }
 
-    public void AttemptDepotInteract(Rover interactingRover, int interactAmount, bool taking)
+    public void AttemptDepotInteract(int interactAmount, bool taking)
     {
         if(taking)
         {
@@ -83,7 +93,7 @@ public class DepotTile : InteractableTile
             }
             else
             {
-                interactingRover.AddSupplies(TakeDepotSupplies(interactAmount));
+                currentRover.AddSupplies(TakeDepotSupplies(interactAmount));
                 NotificationManager.instance.ShowInfoNotification("Successfully took " + interactAmount + " supplies. Depot now has " + depotSupplies + " remaining supplies.");
             }
         }
@@ -95,13 +105,13 @@ public class DepotTile : InteractableTile
             }
             else
             {
-                if(interactingRover.GetSupplies() < interactAmount)
+                if(currentRover.GetSupplies() < interactAmount)
                 {
-                    NotificationManager.instance.ShowInfoNotification("Error: Supply Rover attempted to store " + interactAmount + " supplies, yet Rover only has " + interactingRover.GetSupplies() + " supplies.");
+                    NotificationManager.instance.ShowInfoNotification("Error: Supply Rover attempted to store " + interactAmount + " supplies, yet Rover only has " + currentRover.GetSupplies() + " supplies.");
                 }
                 else
                 {
-                    interactingRover.TakeSupplies(StoreDepotSupplies(interactAmount));
+                    currentRover.TakeSupplies(StoreDepotSupplies(interactAmount));
                     NotificationManager.instance.ShowInfoNotification("Successfully stored " + interactAmount + " supplies. Depot now has " + depotSupplies + " total supplies.");
                 }
             }

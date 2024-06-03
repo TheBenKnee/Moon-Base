@@ -33,6 +33,7 @@ public class Moon : MonoBehaviour
     [SerializeField] private GameObject tileParent;
 
     [SerializeField] private MoonUI moonFrontend;
+    [SerializeField] private GameLogic gameLogic;
 
     [SerializeField] private MoonBase moonBase;
 
@@ -45,6 +46,7 @@ public class Moon : MonoBehaviour
     {
         BuildMoon();
         SpawnRovers();
+        gameLogic.RoverHookup(rovers);
 
         moonFrontend.BuildRoverMenu(rovers);
     }

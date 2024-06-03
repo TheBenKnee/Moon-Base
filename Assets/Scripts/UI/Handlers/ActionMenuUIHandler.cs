@@ -21,7 +21,7 @@ public class ActionMenuUIHandler : MonoBehaviour
         {
             GameObject newAction = Instantiate(actionObject);
             newAction.transform.parent = actionMenuContent.transform;
-            newAction.GetComponent<RoverAction>().InitializeVariables(gameLogic, moonUI);
+            newAction.GetComponent<ActionUIObject>().InitializeAction(gameLogic, moonUI);
         }
     }
 

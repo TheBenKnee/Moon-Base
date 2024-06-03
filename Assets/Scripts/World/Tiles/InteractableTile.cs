@@ -19,11 +19,6 @@ public class InteractableTile : MoonTile
         return true;
     }
 
-    public virtual void FinishedTask(RoverTask finishedTask)
-    {
-        
-    }
-
     //  Void method which actually performs the action of the interactable tile. 
     public virtual void TileAction(Rover interactingRover)
     {

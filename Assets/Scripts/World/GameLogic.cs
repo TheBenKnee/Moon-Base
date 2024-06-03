@@ -6,8 +6,48 @@ public class GameLogic : MonoBehaviour
 {
     [SerializeField] private MoonUI moonUI;
     [SerializeField] private Dice dice;
+    [SerializeField] private GameObject movementButtons;
 
     protected Rover activeRover;
+
+    private List<Rover> roverList = new List<Rover>();
+
+    public void RoverHookup(List<Rover> createdRovers) 
+    {
+        roverList.Clear();
+        foreach(Rover rover in createdRovers)
+        {
+            roverList.Add(rover);
+            rover.OnTaskCompleted += HandleTaskCompleted;
+        }
+    }
+
+    private void HandleTaskCompleted(Rover rover, TaskType taskType)
+    {
+        switch(taskType)
+        {
+            case TaskType.ExperimentCollection:
+            {
+                break;
+            }
+            case TaskType.ExperimentRepair:
+            {
+                break;
+            }
+            case TaskType.SupplyDepotOpening:
+            {
+                break;
+            }
+            case TaskType.SupplyDepotRepairing:
+            {
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
+    }
 
     public void SetActiveRover(Rover newRover)
     {
@@ -29,33 +69,72 @@ public class GameLogic : MonoBehaviour
         }
     }
 
+    public void UpdateSupplyCountUIOnActiveRover()
+    {
+        moonUI.UpdateSupplyUI(activeRover);
+    }
+
     public void DiceResult(int result)
     {
         if(!activeRover.CheckSupplies(Constants.SUPPLY_REQUIREMENT(result)))
         {
-            //Trigger recovery operations
+            NotificationManager.instance.ShowInfoNotification("Entering recovery mode! Rover has reached danger low supply level. Resupply with Supply or Repair rovers!");
+            activeRover.EnterRecoveryMode();
+            dice.ClearDice();
         }
-        activeRover.SetRemainingMovement(result);
+        else
+        {
+            if(result == 6)
+            {
+                NotificationManager.instance.ShowQueryNotification("Rolled 6! Move 6 spaces for free (yes) or gain " + Constants.FREE_SUPPLIES_FROM_6 + " free supplies (no).", FreeMovementSelected, FreeSuppliesSelected);
+            }
+            else
+            {
+                activeRover.SetRemainingMovement(result);
+                activeRover.TakeSupplies(Constants.SUPPLY_REQUIREMENT(result));
+                UpdateSupplyCountUIOnActiveRover();
+                movementButtons.SetActive(true);
+            }
+            
+        }
+    }
+
+    public void FreeMovementSelected()
+    {
+        activeRover.SetRemainingMovement(6);
+        movementButtons.SetActive(true);
+    }
+
+    public void FreeSuppliesSelected()
+    {
+        dice.ClearDice();
+        activeRover.AddSupplies(Constants.FREE_SUPPLIES_FROM_6);
+        UpdateSupplyCountUIOnActiveRover();
     }
 
     public void MoveSelectedRover(Direction direction)
     {
-        if(dice.CheckMovementAvailable() && activeRover.CheckDirectionAvailable(direction))
+        if(dice.CheckMovementAvailable() && activeRover.CheckDirectionAvailable(direction) && activeRover.GetRemainingMovement() > 0)
         {
             // Reduce the dice number
             dice.ReduceDieNumber();
 
             // Move the rover
-            activeRover.MoveRover(direction, 3);
+            activeRover.MoveRover(direction);
             activeRover.SetRemainingMovement(activeRover.GetRemainingMovement() - 1);
 
             // Update UI
-            moonUI.UpdateSupplyUI(activeRover);
             moonUI.FocusCameraOnRover(activeRover);
         }
         else
         {
             // Indicate move impossible
+            Debug.Log("Failed to move rover.");
+        }
+
+        if(activeRover.GetRemainingMovement() <= 0)
+        {
+            movementButtons.SetActive(false);
         }
     }
 }

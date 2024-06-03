@@ -34,16 +34,14 @@ public class NotificationManager : MonoBehaviour
     public delegate void NotificationClickAction();
     public delegate void QueryConfiredClickAction();
     public delegate void QueryDenyClickAction();
-    public delegate void DepotInteractClickAction(Rover rover, int supplies, bool taking);
+    public delegate void DepotInteractClickAction(int supplies, bool taking);
 
     public static event NotificationClickAction onNotificationClick;
     public static event QueryConfiredClickAction onQueryConfirmed;
     public static event QueryDenyClickAction onQueryDenied;
     public static event DepotInteractClickAction onDepotInteractRequest;
 
-    private Rover savedRover;
-
-    public void DepotAccessUI(DepotTile depotTile, Rover interactingRover, DepotInteractClickAction interactAction)
+    public void DepotAccessUI(DepotTile depotTile, DepotInteractClickAction interactAction)
     {
         depotAccessUI.OpenDepotUI(depotTile);
 
@@ -51,14 +49,12 @@ public class NotificationManager : MonoBehaviour
 
         onDepotInteractRequest += interactAction;
 
-        savedRover = interactingRover;
-
         depotAccessNotification.ShowObject();
     }
 
     public void OnDepotConfirmedClicked()
     {
-        onDepotInteractRequest?.Invoke(savedRover, depotAccessUI.GetCurrentAmount(), depotAccessUI.IsTaking());
+        onDepotInteractRequest?.Invoke(depotAccessUI.GetCurrentAmount(), depotAccessUI.IsTaking());
 
         depotAccessNotification.HideObject();
     }
